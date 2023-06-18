@@ -474,16 +474,7 @@ int ObjectWriter::EmitSymbolRef(const char *SymbolName,
     Size = 4;
     break;
   case RelocType::IMAGE_REL_TLVPPAGE: {
-      MCSymbol* TempSymbol = OutContext->createTempSymbol();
-      Streamer->emitLabel(TempSymbol);
       const MCExpr* TargetExpr = MCSymbolRefExpr::create(Symbol, MCSymbolRefExpr::VK_TLVPPAGE, *OutContext);
-      const MCSymbolRefExpr* SectionExpr = MCSymbolRefExpr::create(TempSymbol, Kind, *OutContext);
-      TargetExpr = MCBinaryExpr::createSub(
-        TargetExpr, SectionExpr, *OutContext);
-      // If the fixup is pc-relative, we need to bias the value to be relative to
-      // the start of the field, not the end of the field
-      TargetExpr = MCBinaryExpr::createSub(
-        TargetExpr, MCConstantExpr::create(4, *OutContext), *OutContext);
       if (Delta != 0) {
         TargetExpr = MCBinaryExpr::createAdd(
           TargetExpr, MCConstantExpr::create(Delta, *OutContext), *OutContext);
@@ -492,16 +483,7 @@ int ObjectWriter::EmitSymbolRef(const char *SymbolName,
       return 4;
     }
   case RelocType::IMAGE_REL_TLVPPAGEOFF: {
-    MCSymbol* TempSymbol = OutContext->createTempSymbol();
-    Streamer->emitLabel(TempSymbol);
     const MCExpr* TargetExpr = MCSymbolRefExpr::create(Symbol, MCSymbolRefExpr::VK_TLVPPAGEOFF, *OutContext);
-    const MCSymbolRefExpr* SectionExpr = MCSymbolRefExpr::create(TempSymbol, Kind, *OutContext);
-    TargetExpr = MCBinaryExpr::createSub(
-      TargetExpr, SectionExpr, *OutContext);
-    // If the fixup is pc-relative, we need to bias the value to be relative to
-    // the start of the field, not the end of the field
-    TargetExpr = MCBinaryExpr::createSub(
-      TargetExpr, MCConstantExpr::create(4, *OutContext), *OutContext);
     if (Delta != 0) {
       TargetExpr = MCBinaryExpr::createAdd(
         TargetExpr, MCConstantExpr::create(Delta, *OutContext), *OutContext);
