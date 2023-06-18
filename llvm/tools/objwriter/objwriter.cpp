@@ -473,14 +473,42 @@ int ObjectWriter::EmitSymbolRef(const char *SymbolName,
     Kind = MCSymbolRefExpr::VK_TPOFF;
     Size = 4;
     break;
-  case RelocType::IMAGE_REL_TLVPPAGE:
-    Kind = MCSymbolRefExpr::VK_TLVPPAGE;
-    Size = 4;
-    break;
-  case RelocType::IMAGE_REL_TLVPPAGEOFF:
-    Kind = MCSymbolRefExpr::VK_TLVPPAGEOFF;
-    Size = 4;
-    break;
+  case RelocType::IMAGE_REL_TLVPPAGE: {
+      MCSymbol* TempSymbol = OutContext->createTempSymbol();
+      Streamer->emitLabel(TempSymbol);
+      const MCExpr* TargetExpr = MCSymbolRefExpr::create(Symbol, MCSymbolRefExpr::VK_TLVPPAGE, *OutContext);
+      const MCSymbolRefExpr* SectionExpr = MCSymbolRefExpr::create(TempSymbol, Kind, *OutContext);
+      TargetExpr = MCBinaryExpr::createSub(
+        TargetExpr, SectionExpr, *OutContext);
+      // If the fixup is pc-relative, we need to bias the value to be relative to
+      // the start of the field, not the end of the field
+      TargetExpr = MCBinaryExpr::createSub(
+        TargetExpr, MCConstantExpr::create(4, *OutContext), *OutContext);
+      if (Delta != 0) {
+        TargetExpr = MCBinaryExpr::createAdd(
+          TargetExpr, MCConstantExpr::create(Delta, *OutContext), *OutContext);
+      }
+      Streamer->emitValueImpl(TargetExpr, 4, SMLoc(), false);
+      return 4;
+    }
+  case RelocType::IMAGE_REL_TLVPPAGEOFF: {
+    MCSymbol* TempSymbol = OutContext->createTempSymbol();
+    Streamer->emitLabel(TempSymbol);
+    const MCExpr* TargetExpr = MCSymbolRefExpr::create(Symbol, MCSymbolRefExpr::VK_TLVPPAGEOFF, *OutContext);
+    const MCSymbolRefExpr* SectionExpr = MCSymbolRefExpr::create(TempSymbol, Kind, *OutContext);
+    TargetExpr = MCBinaryExpr::createSub(
+      TargetExpr, SectionExpr, *OutContext);
+    // If the fixup is pc-relative, we need to bias the value to be relative to
+    // the start of the field, not the end of the field
+    TargetExpr = MCBinaryExpr::createSub(
+      TargetExpr, MCConstantExpr::create(4, *OutContext), *OutContext);
+    if (Delta != 0) {
+      TargetExpr = MCBinaryExpr::createAdd(
+        TargetExpr, MCConstantExpr::create(Delta, *OutContext), *OutContext);
+    }
+    Streamer->emitValueImpl(TargetExpr, 4, SMLoc(), false);
+    return 4;
+  }
   case RelocType::IMAGE_REL_BASED_REL32:
     if (OutContext->getObjectFileType() == MCContext::IsMachO &&
         OutContext->getTargetTriple().getArch() == Triple::aarch64) {
