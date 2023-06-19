@@ -473,23 +473,14 @@ int ObjectWriter::EmitSymbolRef(const char *SymbolName,
     Kind = MCSymbolRefExpr::VK_TPOFF;
     Size = 4;
     break;
-  case RelocType::IMAGE_REL_TLVPPAGE: {
-      const MCExpr* TargetExpr = MCSymbolRefExpr::create(Symbol, MCSymbolRefExpr::VK_TLVPPAGE, *OutContext);
-      if (Delta != 0) {
-        TargetExpr = MCBinaryExpr::createAdd(
-          TargetExpr, MCConstantExpr::create(Delta, *OutContext), *OutContext);
-      }
-      Streamer->emitValueImpl(TargetExpr, 4, SMLoc(), false);
-      return 4;
-    }
-  case RelocType::IMAGE_REL_TLVPPAGEOFF: {
-    const MCExpr* TargetExpr = MCSymbolRefExpr::create(Symbol, MCSymbolRefExpr::VK_TLVPPAGEOFF, *OutContext);
-    if (Delta != 0) {
-      TargetExpr = MCBinaryExpr::createAdd(
-        TargetExpr, MCConstantExpr::create(Delta, *OutContext), *OutContext);
-    }
-    Streamer->emitValueImpl(TargetExpr, 4, SMLoc(), false);
-    return 4;
+  case RelocType::IMAGE_REL_TLVPPAGE: 
+    Kind = MCSymbolRefExpr::VK_TLVPPAGE;
+    Size = 4;
+    break;
+  case RelocType::IMAGE_REL_TLVPPAGEOFF: 
+    Kind = MCSymbolRefExpr::VK_TLVPPAGEOFF;
+    Size = 4;
+    break;
   }
   case RelocType::IMAGE_REL_BASED_REL32:
     if (OutContext->getObjectFileType() == MCContext::IsMachO &&
