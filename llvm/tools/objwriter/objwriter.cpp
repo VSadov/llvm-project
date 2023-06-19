@@ -473,7 +473,7 @@ int ObjectWriter::EmitSymbolRef(const char *SymbolName,
     Kind = MCSymbolRefExpr::VK_TPOFF;
     Size = 4;
     break;
-  case RelocType::IMAGE_REL_TLVPPAGE: 
+  case RelocType::IMAGE_REL_TLVPPAGE:
     Kind = MCSymbolRefExpr::VK_TLVPPAGE;
     Size = 4;
     break;
@@ -481,7 +481,6 @@ int ObjectWriter::EmitSymbolRef(const char *SymbolName,
     Kind = MCSymbolRefExpr::VK_TLVPPAGEOFF;
     Size = 4;
     break;
-  }
   case RelocType::IMAGE_REL_BASED_REL32:
     if (OutContext->getObjectFileType() == MCContext::IsMachO &&
         OutContext->getTargetTriple().getArch() == Triple::aarch64) {
